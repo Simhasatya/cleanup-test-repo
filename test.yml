@@ -1,0 +1,28 @@
+name: Cleanup Test Branches
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Runs every 5 minutes (For testing, change later to once per day)
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Delete Test Branches
+        run: |
+          # Define the branches to delete
+          BRANCHES_TO_DELETE=("test-1" "test-2" "test-3")
+
+          for branch in "${BRANCHES_TO_DELETE[@]}"; do
+            # Check if branch exists
+            if git ls-remote --heads origin "$branch" | grep "$branch"; then
+              echo "Deleting branch: $branch"
+              git push origin --delete "$branch"
+            else
+              echo "Branch $branch does not exist, skipping..."
+            fi
+          done
